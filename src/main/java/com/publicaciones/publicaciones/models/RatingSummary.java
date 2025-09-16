@@ -30,6 +30,13 @@ public class RatingSummary {
         this.count = count;
     }
 
+    // Constructor usado por la consulta JPQL que incluye postId
+    public RatingSummary(Integer postId, Double average, Long count) {
+        this.postId = postId;
+        this.average = average;
+        this.count = count;
+    }
+
     public Integer getPostId() {
         return postId;
     }

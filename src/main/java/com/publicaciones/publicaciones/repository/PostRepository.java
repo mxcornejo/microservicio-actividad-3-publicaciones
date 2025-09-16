@@ -15,37 +15,29 @@ import com.publicaciones.publicaciones.models.RatingSummary; // { changed code }
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
-    // Cambiado: seleccionar comentarios desde la entidad Comment (no depende de una
-    // colección en Post)
-    @Query("select c from Comment c where c.postId = :postId")
-    List<Comment> getCommentsByPost(@Param("postId") int postId);
 
-    // Cambiado: calcular resumen de ratings usando la entidad Rating directamente
-    @Query("select new com.publicaciones.publicaciones.models.RatingSummary(avg(r.value), count(r)) " +
-            "from Rating r where r.postId = :postId group by r.postId")
-    RatingSummary getRatingSummary(@Param("postId") int postId); // { changed code }
+        @Query("select c from Comment c where c.postId = :postId")
+        List<Comment> getCommentsByPost(@Param("postId") int postId);
 
-    // Posts en un rango de fechas (asume campo createdAt de tipo
-    // LocalDate/LocalDateTime en Post)
-    @Query("select p from Post p where p.createdAt between :from and :to")
-    List<Post> postsByRange(@Param("from") LocalDate from, @Param("to") LocalDate to); // { changed code }
+        @Query("select new com.publicaciones.publicaciones.models.RatingSummary(r.postId, avg(r.value), count(r)) " +
+                        "from Rating r where r.postId = :postId group by r.postId")
+        RatingSummary getRatingSummary(@Param("postId") int postId);
 
-    // Búsqueda por texto en título o contenido
-    @Query("select p from Post p where lower(p.title) like lower(concat('%', :query, '%')) " +
-            "or lower(p.content) like lower(concat('%', :query, '%'))")
-    List<Post> searchPosts(@Param("query") String query); // { changed code }
+        @Query("select p from Post p where p.createdAt between :from and :to")
+        List<Post> postsByRange(@Param("from") LocalDate from, @Param("to") LocalDate to); // { changed code }
 
-    // Top rated - ajustar consulta nativa para Oracle (FETCH FIRST ...)
-    @Query(value = "SELECT p.id as post_id, p.title as title, AVG(r.value) as avg_rating " +
-            "FROM POSTS p JOIN RATINGS r ON r.post_id = p.id " +
-            "GROUP BY p.id, p.title " +
-            "ORDER BY avg_rating DESC " +
-            "FETCH FIRST :limit ROWS ONLY", nativeQuery = true)
-    List<Map<String, Object>> topRated(@Param("limit") int limit); // { changed code }
+        @Query("select p from Post p where lower(p.title) like lower(concat('%', :query, '%')) " +
+                        "or lower(p.content) like lower(concat('%', :query, '%'))")
+        List<Post> searchPosts(@Param("query") String query);
 
-    // Wrapper que reutiliza save() de JpaRepository para mantener la llamada
-    // savePost desde el controlador
-    default Post savePost(Post post) {
-        return save(post);
-    }
+        @Query(value = "SELECT p.id as post_id, p.title as title, AVG(r.value) as avg_rating " +
+                        "FROM POSTS p JOIN RATINGS r ON r.post_id = p.id " +
+                        "GROUP BY p.id, p.title " +
+                        "ORDER BY avg_rating DESC " +
+                        "FETCH FIRST :limit ROWS ONLY", nativeQuery = true)
+        List<Map<String, Object>> topRated(@Param("limit") int limit);
+
+        default Post savePost(Post post) {
+                return save(post);
+        }
 }
