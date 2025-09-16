@@ -85,4 +85,29 @@ public class PostController {
         return repo.savePost(post);
     }
 
+    // Actualiza
+    @PutMapping("/{id}")
+    public Post actualizar(@PathVariable int id, @RequestBody Post updated) {
+        return repo.findById(id).map(existing -> {
+            // actualizar campos permitidos
+            if (updated.getTitle() != null)
+                existing.setTitle(updated.getTitle());
+            if (updated.getContent() != null)
+                existing.setContent(updated.getContent());
+            if (updated.getCreatedAt() != null)
+                existing.setCreatedAt(updated.getCreatedAt());
+            return repo.save(existing);
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post no encontrado"));
+    }
+
+    // Elimina
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminar(@PathVariable int id) {
+        if (!repo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post no encontrado");
+        }
+        repo.deleteById(id);
+    }
+
 }
