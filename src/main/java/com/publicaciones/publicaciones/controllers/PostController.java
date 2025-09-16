@@ -1,7 +1,7 @@
 package com.publicaciones.publicaciones.controllers;
 
 import com.publicaciones.publicaciones.models.*;
-import com.publicaciones.publicaciones.services.DataService;
+import com.publicaciones.publicaciones.repository.PostRepository;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,46 +16,73 @@ import java.util.NoSuchElementException;
 @RequestMapping("/api/posts")
 public class PostController {
 
-    private final DataService data;
+    private final PostRepository repo;
 
-    public PostController(DataService data) { this.data = data; }
+    public PostController(PostRepository repo) {
+        this.repo = repo;
+    }
 
+    // Obtener todos los posts
     @GetMapping
-    public List<Post> getAll() { return data.getPosts(); }
+    public List<Post> getAll() {
+        return repo.findAll();
+    }
 
+    // Obtener un post por su ID
     @GetMapping("/{id}")
     public Post getById(@PathVariable int id) {
-        return data.findPost(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post no encontrado"));
+        return repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post no encontrado"));
     }
 
+    // Obtener comentarios de un post
     @GetMapping("/{id}/comments")
     public List<Comment> getComments(@PathVariable int id) {
-        try { return data.getCommentsByPost(id); }
-        catch (NoSuchElementException e) { throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage()); }
+        try {
+            return repo.getCommentsByPost(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
+    // Obtener resumen de ratings de un post
     @GetMapping("/{id}/rating/avg")
     public RatingSummary getRatingAvg(@PathVariable int id) {
-        try { return data.getRatingSummary(id); }
-        catch (NoSuchElementException e) { throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage()); }
+        try {
+            return repo.getRatingSummary(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
+    // Obtener posts más valorados
     @GetMapping("/top-rated")
     public List<Map<String, Object>> topRated(@RequestParam(defaultValue = "3") int limit) {
-        return data.topRated(limit);
+        return repo.topRated(limit);
     }
 
+    // Buscar posts por rango de fechas
     @GetMapping("/by-range")
     public List<Post> byRange(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        if (to.isBefore(from)) throw new IllegalArgumentException("'from' debe ser <= 'to'");
-        return data.postsByRange(from, to);
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        if (to.isBefore(from))
+            throw new IllegalArgumentException("'from' debe ser <= 'to'");
+        return repo.postsByRange(from, to);
     }
 
+    // Buscar posts por texto
     @GetMapping("/search")
     public List<Post> search(@RequestParam("query") String query) {
-        if (query == null || query.isBlank()) throw new IllegalArgumentException("query requerido");
-        return data.searchPosts(query);
+        if (query == null || query.isBlank())
+            throw new IllegalArgumentException("query requerido");
+        return repo.searchPosts(query);
     }
+
+    // Guarda
+    @PostMapping
+    public Post guardar(@RequestBody Post post) {
+        return repo.savePost(post);
+    }
+
 }

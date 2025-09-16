@@ -1,19 +1,56 @@
 package com.publicaciones.publicaciones.models;
 
-public class RatingSummary {
-    private int postId;
-    private double average;
-    private int count;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
-    public RatingSummary() {}
-    public RatingSummary(int postId, double average, int count) {
-        this.postId = postId; this.average = average; this.count = count;
+@Entity
+@Table(name = "RATING_SUMMARY")
+public class RatingSummary {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer postId;
+
+    @Column(name = "AVERAGE")
+    private Double average;
+
+    @Column(name = "COUNT")
+    private Long count;
+
+    public RatingSummary() {
     }
 
-    public int getPostId() { return postId; }
-    public void setPostId(int postId) { this.postId = postId; }
-    public double getAverage() { return average; }
-    public void setAverage(double average) { this.average = average; }
-    public int getCount() { return count; }
-    public void setCount(int count) { this.count = count; }
+    // Constructor requerido por la expresión JPQL: new RatingSummary(avg(...),
+    // count(...))
+    public RatingSummary(Double average, Long count) {
+        this.average = average;
+        this.count = count;
+    }
+
+    public Integer getPostId() {
+        return postId;
+    }
+
+    public void setPostId(Integer postId) {
+        this.postId = postId;
+    }
+
+    public Double getAverage() {
+        return average;
+    }
+
+    public void setAverage(Double average) {
+        this.average = average;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
+    }
 }
