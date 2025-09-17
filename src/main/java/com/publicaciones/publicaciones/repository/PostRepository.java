@@ -24,7 +24,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
         RatingSummary getRatingSummary(@Param("postId") int postId);
 
         @Query("select p from Post p where p.createdAt between :from and :to")
-        List<Post> postsByRange(@Param("from") LocalDate from, @Param("to") LocalDate to); // { changed code }
+        List<Post> postsByRange(@Param("from") LocalDate from, @Param("to") LocalDate to);
 
         @Query("select p from Post p where lower(p.title) like lower(concat('%', :query, '%')) " +
                         "or lower(p.content) like lower(concat('%', :query, '%'))")
