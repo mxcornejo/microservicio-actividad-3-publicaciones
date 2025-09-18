@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.publicaciones.publicaciones.models.Comment;
 import com.publicaciones.publicaciones.models.Post;
-import com.publicaciones.publicaciones.models.RatingSummary; // { changed code }
+import com.publicaciones.publicaciones.models.RatingSummary;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
